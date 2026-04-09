@@ -11,257 +11,37 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      background: linear-gradient(145deg, #fff0e7 0%, #ffe0d4 100%);
-      font-family: 'Inter', sans-serif;
-      padding: 20px;
-      min-height: 100vh;
-    }
-
-    .journal-app {
-      max-width: 1300px;
-      margin: 0 auto;
-      background: rgba(255, 250, 245, 0.96);
-      backdrop-filter: blur(2px);
-      border-radius: 56px;
-      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.12);
-      overflow: hidden;
-      padding: 24px 28px 40px;
-    }
-
-    .header {
-      text-align: center;
-      margin-bottom: 32px;
-      border-bottom: 2px dashed #f3c6b0;
-      padding-bottom: 20px;
-    }
-    .header h1 {
-      font-family: 'Great Vibes', cursive;
-      font-size: 3.2rem;
-      color: #b13e5c;
-    }
-    .header p {
-      color: #c2776b;
-      margin-top: 8px;
-    }
-    
-    .sync-status {
-      display: inline-block;
-      background: #e8f5e9;
-      border-radius: 60px;
-      padding: 4px 14px;
-      font-size: 0.7rem;
-      margin-top: 10px;
-      color: #2e7d32;
-    }
-    .sync-status.syncing {
-      background: #fff3e0;
-      color: #e68a2e;
-    }
-    .sync-status.error {
-      background: #ffebee;
-      color: #c62828;
-    }
-
-    .journal-grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 32px;
-    }
-    .entry-form {
-      flex: 1.2;
-      min-width: 280px;
-      background: #fffef7;
-      border-radius: 40px;
-      padding: 28px;
-      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.05);
-      border: 1px solid #ffded0;
-    }
-    .entries-list {
-      flex: 1.8;
-      min-width: 300px;
-      background: #fffaf5;
-      border-radius: 40px;
-      padding: 28px;
-      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.05);
-      border: 1px solid #ffded0;
-      max-height: 60vh;
-      overflow-y: auto;
-    }
-
-    .form-title, .list-title {
-      font-size: 1.5rem;
-      font-weight: 600;
-      color: #a1425a;
-      margin-bottom: 22px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      border-left: 5px solid #e68a7c;
-      padding-left: 18px;
-    }
-
-    input, textarea {
-      width: 100%;
-      border: 1.5px solid #ffe0d4;
-      border-radius: 32px;
-      padding: 14px 22px;
-      font-family: 'Inter', sans-serif;
-      font-size: 0.95rem;
-      background: white;
-      margin-bottom: 20px;
-    }
-    input:focus, textarea:focus {
-      outline: none;
-      border-color: #e6838e;
-      box-shadow: 0 0 0 3px rgba(230, 131, 142, 0.2);
-    }
-    textarea {
-      min-height: 150px;
-      resize: vertical;
-    }
-    
-    .btn {
-      background: #e6838e;
-      color: white;
-      border: none;
-      border-radius: 60px;
-      padding: 12px 24px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: 0.2s;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      justify-content: center;
-      width: 100%;
-      font-family: 'Inter', sans-serif;
-    }
-    .btn:hover {
-      background: #cf5c6a;
-      transform: scale(0.98);
-    }
-    .btn-secondary {
-      background: #e2bcb0;
-      color: #6b3e42;
-    }
-    .btn-secondary:hover {
-      background: #d4a999;
-    }
-
-    .journal-card {
-      background: white;
-      border-radius: 32px;
-      padding: 20px;
-      margin-bottom: 22px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
-      border: 1px solid #ffe2d4;
-      transition: all 0.2s;
-    }
-    .journal-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-    }
-    .entry-title {
-      font-size: 1.35rem;
-      font-weight: 700;
-      color: #b13e5c;
-      margin-bottom: 8px;
-    }
-    .entry-meta {
-      font-size: 0.7rem;
-      color: #c28d7a;
-      display: flex;
-      gap: 10px;
-      margin-bottom: 12px;
-      flex-wrap: wrap;
-    }
-    .entry-content {
-      color: #4f3e38;
-      line-height: 1.55;
-      white-space: pre-wrap;
-      background: #fffaf2;
-      padding: 14px 18px;
-      border-radius: 28px;
-      margin-bottom: 16px;
-    }
-    .card-actions {
-      display: flex;
-      gap: 12px;
-      justify-content: flex-end;
-    }
-    .icon-btn {
-      background: transparent;
-      border: none;
-      font-size: 0.85rem;
-      cursor: pointer;
-      color: #bc7a6b;
-      padding: 6px 14px;
-      border-radius: 40px;
-    }
-    .icon-btn:hover {
-      background: #ffe0d4;
-    }
-    .delete-btn:hover {
-      color: #e63946;
-    }
-    .empty-message {
-      text-align: center;
-      color: #c6a18e;
-      padding: 50px 20px;
-    }
-    .love-footer {
-      text-align: center;
-      margin-top: 35px;
-      padding-top: 20px;
-      border-top: 1px solid #f3cfbf;
-      font-family: 'Great Vibes', cursive;
-      font-size: 1.2rem;
-      color: #b35d6e;
-    }
-    .setup-guide {
-      background: #fff3e0;
-      border-radius: 28px;
-      padding: 16px;
-      margin-top: 20px;
-      font-size: 0.8rem;
-    }
-    @media (max-width: 780px) {
-      .journal-app { padding: 16px; }
-      .header h1 { font-size: 2rem; }
-    }
-    .toast-msg {
-      position: fixed;
-      bottom: 30px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #3e2a24e0;
-      color: white;
-      padding: 10px 24px;
-      border-radius: 60px;
-      font-size: 0.85rem;
-      z-index: 1100;
-      transition: 0.2s;
-    }
-    .loading-spinner {
-      display: inline-block;
-      width: 16px;
-      height: 16px;
-      border: 2px solid #fff;
-      border-top-color: transparent;
-      border-radius: 50%;
-      animation: spin 0.6s linear infinite;
-      margin-right: 8px;
-    }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: linear-gradient(145deg, #fff0e7 0%, #ffe0d4 100%); font-family: 'Inter', sans-serif; padding: 20px; min-height: 100vh; }
+    .journal-app { max-width: 1300px; margin: 0 auto; background: rgba(255, 250, 245, 0.96); backdrop-filter: blur(2px); border-radius: 56px; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.12); overflow: hidden; padding: 24px 28px 40px; }
+    .header { text-align: center; margin-bottom: 32px; border-bottom: 2px dashed #f3c6b0; padding-bottom: 20px; }
+    .header h1 { font-family: 'Great Vibes', cursive; font-size: 3.2rem; color: #b13e5c; }
+    .header p { color: #c2776b; margin-top: 8px; }
+    .sync-status { display: inline-block; background: #e8f5e9; border-radius: 60px; padding: 4px 14px; font-size: 0.7rem; margin-top: 10px; color: #2e7d32; }
+    .sync-status.syncing { background: #fff3e0; color: #e68a2e; }
+    .sync-status.error { background: #ffebee; color: #c62828; }
+    .journal-grid { display: flex; flex-wrap: wrap; gap: 32px; }
+    .entry-form { flex: 1.2; min-width: 280px; background: #fffef7; border-radius: 40px; padding: 28px; box-shadow: 0 12px 28px rgba(0, 0, 0, 0.05); border: 1px solid #ffded0; }
+    .entries-list { flex: 1.8; min-width: 300px; background: #fffaf5; border-radius: 40px; padding: 28px; box-shadow: 0 12px 28px rgba(0, 0, 0, 0.05); border: 1px solid #ffded0; max-height: 60vh; overflow-y: auto; }
+    .form-title, .list-title { font-size: 1.5rem; font-weight: 600; color: #a1425a; margin-bottom: 22px; display: flex; align-items: center; gap: 12px; border-left: 5px solid #e68a7c; padding-left: 18px; }
+    input, textarea { width: 100%; border: 1.5px solid #ffe0d4; border-radius: 32px; padding: 14px 22px; font-family: 'Inter', sans-serif; font-size: 0.95rem; background: white; margin-bottom: 20px; }
+    input:focus, textarea:focus { outline: none; border-color: #e6838e; box-shadow: 0 0 0 3px rgba(230, 131, 142, 0.2); }
+    textarea { min-height: 150px; resize: vertical; }
+    .btn { background: #e6838e; color: white; border: none; border-radius: 60px; padding: 12px 24px; font-weight: 600; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 8px; justify-content: center; width: 100%; font-family: 'Inter', sans-serif; }
+    .btn:hover { background: #cf5c6a; transform: scale(0.98); }
+    .journal-card { background: white; border-radius: 32px; padding: 20px; margin-bottom: 22px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04); border: 1px solid #ffe2d4; transition: all 0.2s; }
+    .journal-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
+    .entry-title { font-size: 1.35rem; font-weight: 700; color: #b13e5c; margin-bottom: 8px; }
+    .entry-meta { font-size: 0.7rem; color: #c28d7a; display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+    .entry-content { color: #4f3e38; line-height: 1.55; white-space: pre-wrap; background: #fffaf2; padding: 14px 18px; border-radius: 28px; margin-bottom: 16px; }
+    .card-actions { display: flex; gap: 12px; justify-content: flex-end; }
+    .icon-btn { background: transparent; border: none; font-size: 0.85rem; cursor: pointer; color: #bc7a6b; padding: 6px 14px; border-radius: 40px; }
+    .icon-btn:hover { background: #ffe0d4; }
+    .delete-btn:hover { color: #e63946; }
+    .empty-message { text-align: center; color: #c6a18e; padding: 50px 20px; }
+    .love-footer { text-align: center; margin-top: 35px; padding-top: 20px; border-top: 1px solid #f3cfbf; font-family: 'Great Vibes', cursive; font-size: 1.2rem; color: #b35d6e; }
+    @media (max-width: 780px) { .journal-app { padding: 16px; } .header h1 { font-size: 2rem; } }
+    .toast-msg { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #3e2a24e0; color: white; padding: 10px 24px; border-radius: 60px; font-size: 0.85rem; z-index: 1100; transition: 0.2s; }
   </style>
 </head>
 <body>
@@ -276,65 +56,36 @@
 
   <div class="journal-grid">
     <div class="entry-form">
-      <div class="form-title">
-        <i class="fas fa-pen-fancy"></i> 
-        <span>Write a new memory</span>
-      </div>
+      <div class="form-title"><i class="fas fa-pen-fancy"></i> <span>Write a new memory</span></div>
       <input type="text" id="entryTitle" placeholder="💌 Title (e.g., Our first date)">
       <textarea id="entryContent" placeholder="Write your heart out... Kapag nag-save ka, makikita agad niya ito! ✨"></textarea>
       <button class="btn" id="saveEntryBtn"><i class="fas fa-save"></i> Save to Cloud</button>
-      <p style="font-size: 0.7rem; margin-top: 12px; text-align: center; color:#b98874;">
-        <i class="fas fa-globe"></i> Auto-sync sa Google Sheets — kita agad ng mahal mo!
-      </p>
+      <p style="font-size: 0.7rem; margin-top: 12px; text-align: center; color:#b98874;"><i class="fas fa-globe"></i> Auto-sync sa Google Sheets — kita agad ng mahal mo!</p>
     </div>
 
     <div class="entries-list">
-      <div class="list-title">
-        <i class="fas fa-book-open"></i>
-        <span>Our memories</span>
-        <span style="margin-left: auto; font-size: 0.7rem;" id="entryCount"></span>
-      </div>
-      <div id="entriesContainer">
-        <div class="empty-message"><i class="fas fa-spinner fa-pulse"></i> Loading memories from cloud...</div>
-      </div>
+      <div class="list-title"><i class="fas fa-book-open"></i><span>Our memories</span><span style="margin-left: auto; font-size: 0.7rem;" id="entryCount"></span></div>
+      <div id="entriesContainer"><div class="empty-message"><i class="fas fa-spinner fa-pulse"></i> Loading memories from cloud...</div></div>
     </div>
   </div>
   
-  <div class="setup-guide" id="setupGuide" style="display: none;">
-    <i class="fas fa-cog"></i> <strong>First time setup?</strong> 
-    <a href="#" id="showInstructions">Click here for 2-minute Google Sheets setup</a>
-  </div>
-  
   <div class="love-footer">
-    🌹 “Every love story is beautiful, but ours is my favorite.” — always ours, always saved 🌹
+    🌹 "Every love story is beautiful, but ours is my favorite." — always ours, always saved 🌹
   </div>
 </div>
 <div id="toastMsg" class="toast-msg" style="opacity:0;">✨</div>
 
 <script>
   // ============================================
-  // GOOGLE SHEETS AUTO-SAVE JOURNAL
+  // IYONG GOOGLE SHEETS WEB APP URL
   // ============================================
-  // 
-  // INSTRUCTIONS: 
-  // 1. Create a Google Sheet
-  // 2. Deploy as Web App (Apps Script)
-  // 3. Copy the URL and paste it below
-  // 
-  // ============================================
+  const GOOGLE_SHEETS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwEcGOwk01IDZJk3dTuh79tpF399U55JOTz_JcIRzWmp7C-25QfTuKMVWugNYqay4lQLg/exec";
   
-  // 🔴 IMPORTANT: I-replace ito ng iyong Google Sheets Web App URL
-  // Pagkatapos mong i-deploy ang Apps Script, kopyahin ang URL at i-paste dito:
-  const GOOGLE_SHEETS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbydDWChyzCKkQe0e80G2Ge1NwUgC9MP5H2FKy2JM7mRfpdCc9bE-CmLQE7ndt7phGn4bA/exec";
-  
-  // Check kung may saved URL sa localStorage
-  let currentApiUrl = localStorage.getItem("googleSheetsUrl") || GOOGLE_SHEETS_WEBAPP_URL;
-  
+  let currentApiUrl = GOOGLE_SHEETS_WEBAPP_URL;
   let journalEntries = [];
   let isLoading = false;
   let autoRefreshInterval = null;
   
-  // Status element
   const statusEl = document.getElementById('syncStatus');
   
   function updateStatus(text, isError = false, isSyncing = false) {
@@ -349,27 +100,17 @@
     const toast = document.getElementById('toastMsg');
     toast.innerText = message;
     toast.style.opacity = '1';
-    setTimeout(() => {
-      toast.style.opacity = '0';
-    }, duration);
+    setTimeout(() => { toast.style.opacity = '0'; }, duration);
   }
   
-  // Load entries from Google Sheets
   async function loadEntriesFromCloud() {
     if (isLoading) return;
     isLoading = true;
     
-    if (!currentApiUrl || currentApiUrl === "https://script.google.com/macros/s/AKfycbydDWChyzCKkQe0e80G2Ge1NwUgC9MP5H2FKy2JM7mRfpdCc9bE-CmLQE7ndt7phGn4bA/exec") {
-      updateStatus('⚠️ Need setup: Click guide below', true);
-      document.getElementById('setupGuide').style.display = 'block';
-      isLoading = false;
-      return;
-    }
-    
     updateStatus('<i class="fas fa-spinner fa-pulse"></i> Syncing memories...', false, true);
     
     try {
-      const response = await fetch(currentApiUrl + '?action=get', {
+      const response = await fetch(currentApiUrl, {
         method: 'GET',
         mode: 'cors'
       });
@@ -390,7 +131,6 @@
       console.error('Load error:', error);
       updateStatus('<i class="fas fa-exclamation-triangle"></i> Using offline mode', true);
       
-      // Fallback to localStorage kung offline
       const localBackup = localStorage.getItem("journalBackup");
       if (localBackup) {
         journalEntries = JSON.parse(localBackup);
@@ -401,20 +141,12 @@
         renderEntries();
       }
     }
-    
     isLoading = false;
   }
   
-  // Save entry to Google Sheets
   async function saveToCloud(title, content) {
     if (!title.trim() && !content.trim()) {
       showToast("💌 Please write something before saving!", 2000);
-      return false;
-    }
-    
-    if (!currentApiUrl || currentApiUrl === "https://script.google.com/macros/s/AKfycbydDWChyzCKkQe0e80G2Ge1NwUgC9MP5H2FKy2JM7mRfpdCc9bE-CmLQE7ndt7phGn4bA/exec") {
-      showToast("⚠️ Please complete the Google Sheets setup first (click the guide below)", 3000);
-      document.getElementById('setupGuide').style.display = 'block';
       return false;
     }
     
@@ -432,13 +164,8 @@
       const response = await fetch(currentApiUrl, {
         method: 'POST',
         mode: 'cors',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          action: 'add',
-          entry: newEntry
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'add', entry: newEntry })
       });
       
       if (!response.ok) throw new Error('Save failed');
@@ -446,7 +173,6 @@
       const result = await response.json();
       
       if (result.success) {
-        // Refresh agad para makita ang bagong entry
         await loadEntriesFromCloud();
         updateStatus('<i class="fas fa-check-circle"></i> Saved to cloud!', false);
         showToast('✨ Saved! Makikita na rin ng mahal mo ✨', 2500);
@@ -462,24 +188,13 @@
     }
   }
   
-  // Delete entry
   async function deleteFromCloud(id) {
-    if (!currentApiUrl || currentApiUrl === "https://script.google.com/macros/s/AKfycbydDWChyzCKkQe0e80G2Ge1NwUgC9MP5H2FKy2JM7mRfpdCc9bE-CmLQE7ndt7phGn4bA/exec") {
-      showToast("⚠️ Setup required first", 2000);
-      return;
-    }
-    
     try {
       const response = await fetch(currentApiUrl, {
         method: 'POST',
         mode: 'cors',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          action: 'delete',
-          id: id
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'delete', id: id })
       });
       
       const result = await response.json();
@@ -507,9 +222,7 @@
       return;
     }
     
-    // Sort newest first
     const sorted = [...journalEntries].sort((a,b) => new Date(b.date) - new Date(a.date));
-    
     let html = '';
     for (let entry of sorted) {
       const safeTitle = escapeHtml(entry.title);
@@ -517,9 +230,7 @@
       html += `
         <div class="journal-card">
           <div class="entry-title">${safeTitle}</div>
-          <div class="entry-meta">
-            <span><i class="far fa-calendar-alt"></i> ${entry.formattedDate || new Date(entry.date).toLocaleString()}</span>
-          </div>
+          <div class="entry-meta"><span><i class="far fa-calendar-alt"></i> ${entry.formattedDate || new Date(entry.date).toLocaleString()}</span></div>
           <div class="entry-content">${safeContent}</div>
           <div class="card-actions">
             <button class="icon-btn delete-btn" data-id="${entry.id}"><i class="fas fa-trash-alt"></i> Delete</button>
@@ -529,17 +240,12 @@
     }
     container.innerHTML = html;
     
-    if (countSpan) {
-      countSpan.innerText = `${journalEntries.length} memory${journalEntries.length !== 1 ? 'ies' : 'y'}`;
-    }
+    if (countSpan) countSpan.innerText = `${journalEntries.length} memory${journalEntries.length !== 1 ? 'ies' : 'y'}`;
     
-    // Attach delete events
     document.querySelectorAll('.delete-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const id = Number(btn.getAttribute('data-id'));
-        if (confirm("Delete this memory? It will be removed for both of you.")) {
-          deleteFromCloud(id);
-        }
+        if (confirm("Delete this memory? It will be removed for both of you.")) deleteFromCloud(id);
       });
     });
   }
@@ -554,11 +260,9 @@
     });
   }
   
-  // Save new entry from form
   async function saveNewEntry() {
     const title = document.getElementById('entryTitle').value;
     const content = document.getElementById('entryContent').value;
-    
     const success = await saveToCloud(title, content);
     if (success) {
       document.getElementById('entryTitle').value = '';
@@ -566,99 +270,12 @@
     }
   }
   
-  // Auto-refresh every 10 seconds
   function startAutoRefresh() {
     if (autoRefreshInterval) clearInterval(autoRefreshInterval);
-    autoRefreshInterval = setInterval(() => {
-      loadEntriesFromCloud();
-    }, 10000);
+    autoRefreshInterval = setInterval(() => loadEntriesFromCloud(), 10000);
   }
   
-  // Setup instructions
-  function showSetupInstructions() {
-    const instructions = `
-📝 GOOGLE SHEETS SETUP (2 minutes lang):
-
-1. Pumunta sa: https://sheets.new
-2. Gumawa ng bagong Sheet, pangalan: "Love Journal"
-3. Click Extensions → Apps Script
-4. I-delete ang default code at i-paste ito:
-
----
-function doGet() {
-  return ContentService.createTextOutput(JSON.stringify(getEntries()))
-    .setMimeType(ContentService.MimeType.JSON);
-}
-
-function doPost(e) {
-  try {
-    const data = JSON.parse(e.postData.contents);
-    if (data.action === 'add') {
-      return addEntry(data.entry);
-    } else if (data.action === 'delete') {
-      return deleteEntry(data.id);
-    }
-    return {success: false, error: "Invalid action"};
-  } catch(err) {
-    return {success: false, error: err.toString()};
-  }
-}
-
-function getEntries() {
-  const sheet = SpreadsheetApp.getActiveSheet();
-  const data = sheet.getDataRange().getValues();
-  const entries = [];
-  for(let i=1; i<data.length; i++) {
-    if(data[i][0]) {
-      entries.push(JSON.parse(data[i][0]));
-    }
-  }
-  return {success: true, entries: entries};
-}
-
-function addEntry(entry) {
-  const sheet = SpreadsheetApp.getActiveSheet();
-  sheet.appendRow([JSON.stringify(entry)]);
-  return {success: true};
-}
-
-function deleteEntry(id) {
-  const sheet = SpreadsheetApp.getActiveSheet();
-  const data = sheet.getDataRange().getValues();
-  for(let i=data.length-1; i>=1; i--) {
-    if(data[i][0]) {
-      const entry = JSON.parse(data[i][0]);
-      if(entry.id == id) {
-        sheet.deleteRow(i+1);
-        return {success: true};
-      }
-    }
-  }
-  return {success: false, error: "Not found"};
-}
----
-
-5. I-click Deploy → New Deployment
-6. Type: "Web App", Execute as: "Me", Access: "Anyone"
-7. I-click Deploy → Authorize → Copy URL
-8. I-paste ang URL sa journal website (sa code: GOOGLE_SHEETS_WEBAPP_URL)
-9. I-upload ulit sa GitHub
-
-Tapos na! Auto-sync na ang journal ninyo! 💕
-    `;
-    
-    alert(instructions);
-    showToast("📋 Check the instructions! Kailangan lang ng 2 minutes setup.", 5000);
-  }
-  
-  // Event listeners
   document.getElementById('saveEntryBtn').addEventListener('click', saveNewEntry);
-  document.getElementById('showInstructions').addEventListener('click', (e) => {
-    e.preventDefault();
-    showSetupInstructions();
-  });
-  
-  // Ctrl+Enter shortcut
   document.getElementById('entryContent').addEventListener('keydown', (e) => {
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
       e.preventDefault();
@@ -666,15 +283,11 @@ Tapos na! Auto-sync na ang journal ninyo! 💕
     }
   });
   
-  // Initial load
   loadEntriesFromCloud();
   startAutoRefresh();
   
-  // Save backup sa localStorage
   setInterval(() => {
-    if (journalEntries.length > 0) {
-      localStorage.setItem("journalBackup", JSON.stringify(journalEntries));
-    }
+    if (journalEntries.length > 0) localStorage.setItem("journalBackup", JSON.stringify(journalEntries));
   }, 30000);
 </script>
 </body>
