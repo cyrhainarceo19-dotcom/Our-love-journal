@@ -2,272 +2,178 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Our Forever Journal | Our Love Story</title>
-  <meta name="description" content="Our shared love journal - real-time love notes">
-  <meta name="robots" content="index, follow">
-  
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@300;400;500;600;700&family=Great+Vibes&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Our Forever Journal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Great+Vibes&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: linear-gradient(145deg, #fff0e7 0%, #ffe0d4 100%); font-family: 'Inter', sans-serif; padding: 20px; min-height: 100vh; }
-    .journal-app { max-width: 1300px; margin: 0 auto; background: rgba(255, 250, 245, 0.96); border-radius: 56px; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.12); padding: 24px 28px 40px; }
+    body { background: linear-gradient(145deg, #fff0e7 0%, #ffe0d4 100%); font-family: 'Inter', sans-serif; padding: 20px; }
+    .journal-app { max-width: 1300px; margin: 0 auto; background: rgba(255, 250, 245, 0.96); border-radius: 56px; padding: 24px 28px 40px; }
     .header { text-align: center; margin-bottom: 32px; border-bottom: 2px dashed #f3c6b0; padding-bottom: 20px; }
     .header h1 { font-family: 'Great Vibes', cursive; font-size: 3.2rem; color: #b13e5c; }
-    .header p { color: #c2776b; margin-top: 8px; }
     .sync-status { display: inline-block; background: #e8f5e9; border-radius: 60px; padding: 4px 14px; font-size: 0.7rem; margin-top: 10px; color: #2e7d32; }
-    .sync-status.syncing { background: #fff3e0; color: #e68a2e; }
-    .sync-status.error { background: #ffebee; color: #c62828; }
     .journal-grid { display: flex; flex-wrap: wrap; gap: 32px; }
-    .entry-form { flex: 1.2; min-width: 280px; background: #fffef7; border-radius: 40px; padding: 28px; box-shadow: 0 12px 28px rgba(0, 0, 0, 0.05); border: 1px solid #ffded0; }
-    .entries-list { flex: 1.8; min-width: 300px; background: #fffaf5; border-radius: 40px; padding: 28px; box-shadow: 0 12px 28px rgba(0, 0, 0, 0.05); border: 1px solid #ffded0; max-height: 60vh; overflow-y: auto; }
+    .entry-form { flex: 1.2; min-width: 280px; background: #fffef7; border-radius: 40px; padding: 28px; border: 1px solid #ffded0; }
+    .entries-list { flex: 1.8; min-width: 300px; background: #fffaf5; border-radius: 40px; padding: 28px; border: 1px solid #ffded0; max-height: 60vh; overflow-y: auto; }
     .form-title, .list-title { font-size: 1.5rem; font-weight: 600; color: #a1425a; margin-bottom: 22px; display: flex; align-items: center; gap: 12px; border-left: 5px solid #e68a7c; padding-left: 18px; }
-    input, textarea { width: 100%; border: 1.5px solid #ffe0d4; border-radius: 32px; padding: 14px 22px; font-family: 'Inter', sans-serif; font-size: 0.95rem; background: white; margin-bottom: 20px; }
-    input:focus, textarea:focus { outline: none; border-color: #e6838e; box-shadow: 0 0 0 3px rgba(230, 131, 142, 0.2); }
+    input, textarea { width: 100%; border: 1.5px solid #ffe0d4; border-radius: 32px; padding: 14px 22px; font-family: 'Inter', sans-serif; margin-bottom: 20px; }
     textarea { min-height: 150px; resize: vertical; }
-    .btn { background: #e6838e; color: white; border: none; border-radius: 60px; padding: 12px 24px; font-weight: 600; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 8px; justify-content: center; width: 100%; font-family: 'Inter', sans-serif; }
-    .btn:hover { background: #cf5c6a; transform: scale(0.98); }
-    .journal-card { background: white; border-radius: 32px; padding: 20px; margin-bottom: 22px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04); border: 1px solid #ffe2d4; transition: all 0.2s; }
-    .journal-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
-    .entry-title { font-size: 1.35rem; font-weight: 700; color: #b13e5c; margin-bottom: 8px; }
-    .entry-meta { font-size: 0.7rem; color: #c28d7a; display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
-    .entry-content { color: #4f3e38; line-height: 1.55; white-space: pre-wrap; background: #fffaf2; padding: 14px 18px; border-radius: 28px; margin-bottom: 16px; }
-    .card-actions { display: flex; gap: 12px; justify-content: flex-end; }
-    .icon-btn { background: transparent; border: none; font-size: 0.85rem; cursor: pointer; color: #bc7a6b; padding: 6px 14px; border-radius: 40px; }
-    .icon-btn:hover { background: #ffe0d4; }
-    .delete-btn:hover { color: #e63946; }
-    .empty-message { text-align: center; color: #c6a18e; padding: 50px 20px; }
-    .love-footer { text-align: center; margin-top: 35px; padding-top: 20px; border-top: 1px solid #f3cfbf; font-family: 'Great Vibes', cursive; font-size: 1.2rem; color: #b35d6e; }
-    @media (max-width: 780px) { .journal-app { padding: 16px; } .header h1 { font-size: 2rem; } }
-    .toast-msg { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #3e2a24e0; color: white; padding: 10px 24px; border-radius: 60px; font-size: 0.85rem; z-index: 1100; transition: 0.2s; }
+    .btn { background: #e6838e; color: white; border: none; border-radius: 60px; padding: 12px 24px; font-weight: 600; cursor: pointer; width: 100%; font-family: 'Inter', sans-serif; }
+    .journal-card { background: white; border-radius: 32px; padding: 20px; margin-bottom: 22px; border: 1px solid #ffe2d4; }
+    .entry-title { font-size: 1.35rem; font-weight: 700; color: #b13e5c; }
+    .entry-meta { font-size: 0.7rem; color: #c28d7a; margin: 8px 0 12px; }
+    .entry-content { color: #4f3e38; line-height: 1.55; white-space: pre-wrap; background: #fffaf2; padding: 14px 18px; border-radius: 28px; }
+    .delete-btn { background: transparent; border: none; color: #bc7a6b; cursor: pointer; float: right; }
+    .love-footer { text-align: center; margin-top: 35px; font-family: 'Great Vibes', cursive; color: #b35d6e; }
+    .toast-msg { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #3e2a24e0; color: white; padding: 10px 24px; border-radius: 60px; z-index: 1100; transition: 0.2s; }
   </style>
 </head>
 <body>
 <div class="journal-app">
   <div class="header">
-    <h1><i class="fas fa-heart" style="color:#e6838e;"></i> Our Forever Journal <i class="fas fa-cloud-upload-alt"></i></h1>
+    <h1><i class="fas fa-heart"></i> Our Forever Journal</h1>
     <p>auto-save • real-time sync • laging magkasama ang mga alaala natin</p>
-    <div class="sync-status" id="syncStatus">
-      <i class="fas fa-check-circle"></i> Connected • Real-time ON
-    </div>
+    <div class="sync-status" id="syncStatus"><i class="fas fa-check-circle"></i> Connected</div>
   </div>
 
   <div class="journal-grid">
     <div class="entry-form">
       <div class="form-title"><i class="fas fa-pen-fancy"></i> <span>Write a new memory</span></div>
-      <input type="text" id="entryTitle" placeholder="💌 Title (e.g., Our first date)">
-      <textarea id="entryContent" placeholder="Write your heart out... Kapag nag-save ka, makikita agad niya ito! ✨"></textarea>
+      <input type="text" id="entryTitle" placeholder="💌 Title">
+      <textarea id="entryContent" placeholder="Write your heart out..."></textarea>
       <button class="btn" id="saveEntryBtn"><i class="fas fa-save"></i> Save to Cloud</button>
-      <p style="font-size: 0.7rem; margin-top: 12px; text-align: center; color:#b98874;"><i class="fas fa-globe"></i> Auto-sync — kita agad ng mahal mo!</p>
     </div>
 
     <div class="entries-list">
       <div class="list-title"><i class="fas fa-book-open"></i><span>Our memories</span><span style="margin-left: auto; font-size: 0.7rem;" id="entryCount"></span></div>
-      <div id="entriesContainer"><div class="empty-message"><i class="fas fa-spinner fa-pulse"></i> Loading memories from cloud...</div></div>
+      <div id="entriesContainer"><div class="empty-message"><i class="fas fa-spinner fa-pulse"></i> Loading...</div></div>
     </div>
   </div>
   
-  <div class="love-footer">
-    🌹 "Every love story is beautiful, but ours is my favorite." — always ours, always saved 🌹
-  </div>
+  <div class="love-footer">🌹 "Every love story is beautiful, but ours is my favorite." 🌹</div>
 </div>
 <div id="toastMsg" class="toast-msg" style="opacity:0;">✨</div>
 
 <script>
-  // ============================================
-  // GUMAGANA NA ANG APPS SCRIPT!
-  // ============================================
-  const GOOGLE_SHEETS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxXZ43xMr_0g0ruk0UCEiXIK3tmsGmEuuK1EYgZPsCVjwKMjrfBb9FdICN8r1YPOLJtdg/exec";
+  const API_URL = "https://script.google.com/macros/s/AKfycbxXZ43xMr_0g0ruk0UCEiXIK3tmsGmEuuK1EYgZPsCVjwKMjrfBb9FdICN8r1YPOLJtdg/exec";
   
   let journalEntries = [];
-  let isLoading = false;
-  let autoRefreshInterval = null;
   
-  const statusEl = document.getElementById('syncStatus');
-  
-  function updateStatus(text, isError = false) {
-    if (!statusEl) return;
-    statusEl.innerHTML = text;
-    statusEl.classList.remove('error');
-    if (isError) statusEl.classList.add('error');
-  }
-  
-  function showToast(message, duration = 2500) {
+  function showToast(msg, duration = 2500) {
     const toast = document.getElementById('toastMsg');
-    toast.innerText = message;
+    toast.innerText = msg;
     toast.style.opacity = '1';
     setTimeout(() => { toast.style.opacity = '0'; }, duration);
   }
   
-  async function loadEntriesFromCloud() {
-    if (isLoading) return;
-    isLoading = true;
-    
+  async function loadEntries() {
     try {
-      const response = await fetch(GOOGLE_SHEETS_WEBAPP_URL, { method: 'GET', mode: 'cors' });
-      if (!response.ok) throw new Error('Network error');
-      
-      const data = await response.json();
-      
-      if (data.success && data.entries) {
+      const res = await fetch(API_URL);
+      const data = await res.json();
+      if (data.success) {
         journalEntries = data.entries;
         renderEntries();
-        updateStatus('<i class="fas fa-check-circle"></i> Connected • Real-time ON', false);
-      } else {
-        throw new Error(data.error || 'Failed to load');
       }
-    } catch (error) {
-      console.error('Load error:', error);
-      updateStatus('<i class="fas fa-exclamation-triangle"></i> Using offline mode', true);
-      const localBackup = localStorage.getItem("journalBackup");
-      if (localBackup) {
-        journalEntries = JSON.parse(localBackup);
-        renderEntries();
-      }
-    }
-    isLoading = false;
+    } catch(e) { console.error(e); }
   }
   
-  async function saveToCloud(title, content) {
+  async function saveEntry() {
+    const title = document.getElementById('entryTitle').value;
+    const content = document.getElementById('entryContent').value;
+    
     if (!title.trim() && !content.trim()) {
-      showToast("💌 Please write something before saving!", 2000);
-      return false;
+      showToast("💌 Please write something!", 2000);
+      return;
     }
     
-    const newEntry = {
+    const entry = {
       id: Date.now(),
       title: title.trim() || "💭 A sweet memory",
-      content: content.trim() || "✨ (a beautiful moment)",
+      content: content.trim() || "✨",
       date: new Date().toISOString(),
       formattedDate: new Date().toLocaleString()
     };
     
     try {
-      const response = await fetch(GOOGLE_SHEETS_WEBAPP_URL, {
+      const res = await fetch(API_URL, {
         method: 'POST',
-        mode: 'cors',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'add', entry: newEntry })
+        body: JSON.stringify({ action: 'add', entry: entry })
       });
       
-      if (!response.ok) throw new Error('Save failed');
-      
-      const result = await response.json();
+      const result = await res.json();
       
       if (result.success) {
-        await loadEntriesFromCloud();
-        showToast('✨ Saved! Makikita na rin ng mahal mo ✨', 2500);
-        return true;
+        document.getElementById('entryTitle').value = '';
+        document.getElementById('entryContent').value = '';
+        await loadEntries();
+        showToast('✨ Saved! ✨', 2000);
       } else {
         throw new Error(result.error);
       }
-    } catch (error) {
-      console.error('Save error:', error);
-      showToast('⚠️ Error saving, try again', 3000);
-      return false;
+    } catch(e) {
+      console.error(e);
+      showToast('❌ Error saving. Try again.', 3000);
     }
   }
   
-  async function deleteFromCloud(id) {
+  async function deleteEntry(id) {
     try {
-      const response = await fetch(GOOGLE_SHEETS_WEBAPP_URL, {
+      const res = await fetch(API_URL, {
         method: 'POST',
-        mode: 'cors',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'delete', id: id })
       });
-      
-      const result = await response.json();
+      const result = await res.json();
       if (result.success) {
-        await loadEntriesFromCloud();
-        showToast('🗑️ Memory deleted', 1500);
+        await loadEntries();
+        showToast('🗑️ Deleted', 1500);
       }
-    } catch (error) {
-      showToast('Error deleting', 1500);
-    }
+    } catch(e) { console.error(e); }
   }
   
   function renderEntries() {
     const container = document.getElementById('entriesContainer');
     const countSpan = document.getElementById('entryCount');
     
-    if (!container) return;
-    
-    if (!journalEntries || journalEntries.length === 0) {
-      container.innerHTML = `<div class="empty-message"><i class="far fa-heart"></i> No memories yet. Write your first memory! 💕</div>`;
+    if (!journalEntries.length) {
+      container.innerHTML = '<div class="empty-message">No memories yet. Write your first memory! 💕</div>';
       if (countSpan) countSpan.innerText = '0 memories';
       return;
     }
     
-    const sorted = [...journalEntries].sort((a,b) => new Date(b.date) - new Date(a.date));
     let html = '';
-    for (let entry of sorted) {
-      const safeTitle = escapeHtml(entry.title);
-      const safeContent = escapeHtml(entry.content).replace(/\n/g, '<br>');
+    for (let e of journalEntries.sort((a,b) => new Date(b.date) - new Date(a.date))) {
       html += `
         <div class="journal-card">
-          <div class="entry-title">${safeTitle}</div>
-          <div class="entry-meta"><span><i class="far fa-calendar-alt"></i> ${entry.formattedDate || new Date(entry.date).toLocaleString()}</span></div>
-          <div class="entry-content">${safeContent}</div>
-          <div class="card-actions">
-            <button class="icon-btn delete-btn" data-id="${entry.id}"><i class="fas fa-trash-alt"></i> Delete</button>
-          </div>
+          <div class="entry-title">${escapeHtml(e.title)}</div>
+          <div class="entry-meta"><i class="far fa-calendar-alt"></i> ${e.formattedDate}</div>
+          <div class="entry-content">${escapeHtml(e.content).replace(/\n/g, '<br>')}</div>
+          <button class="delete-btn" data-id="${e.id}"><i class="fas fa-trash-alt"></i> Delete</button>
         </div>
       `;
     }
     container.innerHTML = html;
-    
-    if (countSpan) countSpan.innerText = `${journalEntries.length} memory${journalEntries.length !== 1 ? 'ies' : 'y'}`;
+    if (countSpan) countSpan.innerText = `${journalEntries.length} memories`;
     
     document.querySelectorAll('.delete-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const id = Number(btn.getAttribute('data-id'));
-        if (confirm("Delete this memory? It will be removed for both of you.")) deleteFromCloud(id);
-      });
+      btn.addEventListener('click', () => deleteEntry(Number(btn.dataset.id)));
     });
   }
   
   function escapeHtml(str) {
     if (!str) return '';
-    return str.replace(/[&<>]/g, function(m) {
-      if (m === '&') return '&amp;';
-      if (m === '<') return '&lt;';
-      if (m === '>') return '&gt;';
-      return m;
-    });
+    return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
   }
   
-  async function saveNewEntry() {
-    const title = document.getElementById('entryTitle').value;
-    const content = document.getElementById('entryContent').value;
-    const success = await saveToCloud(title, content);
-    if (success) {
-      document.getElementById('entryTitle').value = '';
-      document.getElementById('entryContent').value = '';
-    }
-  }
-  
-  function startAutoRefresh() {
-    if (autoRefreshInterval) clearInterval(autoRefreshInterval);
-    autoRefreshInterval = setInterval(() => loadEntriesFromCloud(), 8000);
-  }
-  
-  document.getElementById('saveEntryBtn').addEventListener('click', saveNewEntry);
+  document.getElementById('saveEntryBtn').addEventListener('click', saveEntry);
   document.getElementById('entryContent').addEventListener('keydown', (e) => {
-    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-      e.preventDefault();
-      saveNewEntry();
-    }
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') saveEntry();
   });
   
-  loadEntriesFromCloud();
-  startAutoRefresh();
-  
-  setInterval(() => {
-    if (journalEntries.length > 0) localStorage.setItem("journalBackup", JSON.stringify(journalEntries));
-  }, 30000);
+  loadEntries();
+  setInterval(loadEntries, 8000);
 </script>
 </body>
 </html>
