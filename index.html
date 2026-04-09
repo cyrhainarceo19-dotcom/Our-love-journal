@@ -30,7 +30,7 @@
     .journal-card { background: white; border-radius: 32px; padding: 20px; margin-bottom: 22px; border: 1px solid #ffe2d4; transition: all 0.2s; }
     .journal-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
     .entry-title { font-size: 1.35rem; font-weight: 700; color: #b13e5c; margin-bottom: 8px; }
-    .entry-meta { font-size: 0.7rem; color: #c28d7a; display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+    .entry-meta { font-size: 0.7rem; color: #c28d7a; display: flex; gap: 10px; margin-bottom: 12px; }
     .entry-content { color: #4f3e38; line-height: 1.55; white-space: pre-wrap; background: #fffaf2; padding: 14px 18px; border-radius: 28px; margin-bottom: 16px; }
     .card-actions { display: flex; gap: 12px; justify-content: flex-end; }
     .icon-btn { background: transparent; border: none; font-size: 0.85rem; cursor: pointer; color: #bc7a6b; padding: 6px 14px; border-radius: 40px; }
@@ -75,12 +75,11 @@
 
 <script>
   // ============================================
-  // IYONG GOOGLE SHEETS WEB APP URL
+  // IYONG SHEET.BEST API URL (GUMAGANA NA!)
   // ============================================
-  const GOOGLE_SHEETS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxXZ43xMr_0g0ruk0UCEiXIK3tmsGmEuuK1EYgZPsCVjwKMjrfBb9FdICN8r1YPOLJtdg/exec";
+  const API_URL = "https://api.sheetbest.com/sheets/0b088288-a0a5-48ee-9b34-6471158b7994";
   
   let journalEntries = [];
-  let isLoading = false;
   let autoRefreshInterval = null;
   
   const statusEl = document.getElementById('syncStatus');
@@ -99,43 +98,63 @@
     setTimeout(() => { toast.style.opacity = '0'; }, duration);
   }
   
-  async function loadEntriesFromCloud() {
-    if (isLoading) return;
-    isLoading = true;
-    
+  // Convert Sheet.best data to array of entries
+  function parseEntries(data) {
+    const entries = [];
+    if (Array.isArray(data)) {
+      for (let item of data) {
+        // Handle Sheet.best format - get the first key-value pair
+        if (typeof item === 'object') {
+          for (let key in item) {
+            if (item.hasOwnProperty(key)) {
+              try {
+                // Try to parse the value as JSON
+                let entry = item[key];
+                if (typeof entry === 'string') {
+                  entry = JSON.parse(entry);
+                }
+                entries.push(entry);
+              } catch(e) {
+                console.error('Parse error:', e);
+              }
+            }
+          }
+        }
+      }
+    }
+    return entries;
+  }
+  
+  async function loadEntries() {
     try {
-      const response = await fetch(GOOGLE_SHEETS_WEBAPP_URL);
+      const response = await fetch(API_URL);
       if (!response.ok) throw new Error('Network error');
       
-      const data = await response.json();
-      
-      if (data.success && data.entries) {
-        journalEntries = data.entries;
-        renderEntries();
-        updateStatus('<i class="fas fa-check-circle"></i> Connected • Auto-sync ON', false);
-      } else {
-        throw new Error(data.error || 'Failed to load');
-      }
+      const rawData = await response.json();
+      journalEntries = parseEntries(rawData);
+      renderEntries();
+      updateStatus('<i class="fas fa-check-circle"></i> Connected • Auto-sync ON', false);
+      console.log('Loaded entries:', journalEntries);
     } catch (error) {
       console.error('Load error:', error);
-      updateStatus('<i class="fas fa-exclamation-triangle"></i> Using offline mode', true);
+      updateStatus('<i class="fas fa-exclamation-triangle"></i> Connection issue', true);
+      
       const localBackup = localStorage.getItem("journalBackup");
       if (localBackup) {
         journalEntries = JSON.parse(localBackup);
         renderEntries();
       }
     }
-    isLoading = false;
   }
   
-  async function saveToCloud(title, content) {
+  async function saveEntry(title, content) {
     if (!title.trim() && !content.trim()) {
       showToast("💌 Please write something before saving!", 2000);
       return false;
     }
     
     const newEntry = {
-      id: Date.now(),
+      id: Date.now().toString(),
       title: title.trim() || "💭 A sweet memory",
       content: content.trim() || "✨ (a beautiful moment)",
       date: new Date().toISOString(),
@@ -143,21 +162,17 @@
     };
     
     try {
-      const response = await fetch(GOOGLE_SHEETS_WEBAPP_URL, {
+      const response = await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'add', entry: newEntry })
+        body: JSON.stringify(newEntry)
       });
       
-      const result = await response.json();
+      if (!response.ok) throw new Error('Save failed');
       
-      if (result.success) {
-        await loadEntriesFromCloud();
-        showToast('✨ Saved! Makikita na rin ng mahal mo ✨', 2500);
-        return true;
-      } else {
-        throw new Error(result.error || 'Save failed');
-      }
+      await loadEntries();
+      showToast('✨ Saved! Makikita na rin ng mahal mo ✨', 2500);
+      return true;
     } catch (error) {
       console.error('Save error:', error);
       showToast('⚠️ Error saving, try again', 3000);
@@ -165,20 +180,35 @@
     }
   }
   
-  async function deleteFromCloud(id) {
+  async function deleteEntry(id) {
     try {
-      const response = await fetch(GOOGLE_SHEETS_WEBAPP_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'delete', id: id })
-      });
+      // Need to find and delete by id - Sheet.best doesn't support direct DELETE by id
+      // So we'll load all, find the one to delete, and use its index
+      const response = await fetch(API_URL);
+      const rawData = await response.json();
+      const entries = parseEntries(rawData);
       
-      const result = await response.json();
-      if (result.success) {
-        await loadEntriesFromCloud();
-        showToast('🗑️ Memory deleted', 1500);
+      let indexToDelete = -1;
+      for (let i = 0; i < entries.length; i++) {
+        if (entries[i].id == id) {
+          indexToDelete = i;
+          break;
+        }
+      }
+      
+      if (indexToDelete !== -1) {
+        const deleteResponse = await fetch(`${API_URL}/${indexToDelete}`, { method: 'DELETE' });
+        if (deleteResponse.ok) {
+          await loadEntries();
+          showToast('🗑️ Memory deleted', 1500);
+        } else {
+          throw new Error('Delete failed');
+        }
+      } else {
+        showToast('Entry not found', 1500);
       }
     } catch (error) {
+      console.error('Delete error:', error);
       showToast('Error deleting', 1500);
     }
   }
@@ -217,8 +247,8 @@
     
     document.querySelectorAll('.delete-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
-        const id = Number(btn.getAttribute('data-id'));
-        if (confirm("Delete this memory? It will be removed for both of you.")) deleteFromCloud(id);
+        const id = btn.getAttribute('data-id');
+        if (confirm("Delete this memory? It will be removed for both of you.")) deleteEntry(id);
       });
     });
   }
@@ -236,16 +266,11 @@
   async function saveNewEntry() {
     const title = document.getElementById('entryTitle').value;
     const content = document.getElementById('entryContent').value;
-    const success = await saveToCloud(title, content);
+    const success = await saveEntry(title, content);
     if (success) {
       document.getElementById('entryTitle').value = '';
       document.getElementById('entryContent').value = '';
     }
-  }
-  
-  function startAutoRefresh() {
-    if (autoRefreshInterval) clearInterval(autoRefreshInterval);
-    autoRefreshInterval = setInterval(() => loadEntriesFromCloud(), 8000);
   }
   
   document.getElementById('saveEntryBtn').addEventListener('click', saveNewEntry);
@@ -256,8 +281,8 @@
     }
   });
   
-  loadEntriesFromCloud();
-  startAutoRefresh();
+  loadEntries();
+  autoRefreshInterval = setInterval(loadEntries, 8000);
   
   setInterval(() => {
     if (journalEntries.length > 0) localStorage.setItem("journalBackup", JSON.stringify(journalEntries));
