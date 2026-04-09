@@ -325,7 +325,7 @@
   
   // 🔴 IMPORTANT: I-replace ito ng iyong Google Sheets Web App URL
   // Pagkatapos mong i-deploy ang Apps Script, kopyahin ang URL at i-paste dito:
-  const GOOGLE_SHEETS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwWghLl3zbxcdWZRnYNlZVCRF6IOvPdPFDBsVFec4g-R71bHRMnRoSjQtbLMiN2j2I6/exec";
+  const GOOGLE_SHEETS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwZO2UxvvWQvJxKk3z-NZFTmxaS6TPCqp0zIcj71FBS3ye0eepootokTr1wBKChvQfWag/exec";
   
   // Check kung may saved URL sa localStorage
   let currentApiUrl = localStorage.getItem("googleSheetsUrl") || GOOGLE_SHEETS_WEBAPP_URL;
@@ -359,7 +359,7 @@
     if (isLoading) return;
     isLoading = true;
     
-    if (!currentApiUrl || currentApiUrl === "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE") {
+    if (!currentApiUrl || currentApiUrl === "https://script.google.com/macros/s/AKfycbwZO2UxvvWQvJxKk3z-NZFTmxaS6TPCqp0zIcj71FBS3ye0eepootokTr1wBKChvQfWag/exec") {
       updateStatus('⚠️ Need setup: Click guide below', true);
       document.getElementById('setupGuide').style.display = 'block';
       isLoading = false;
@@ -412,7 +412,7 @@
       return false;
     }
     
-    if (!currentApiUrl || currentApiUrl === "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE") {
+    if (!currentApiUrl || currentApiUrl === "https://script.google.com/macros/s/AKfycbwZO2UxvvWQvJxKk3z-NZFTmxaS6TPCqp0zIcj71FBS3ye0eepootokTr1wBKChvQfWag/exec") {
       showToast("⚠️ Please complete the Google Sheets setup first (click the guide below)", 3000);
       document.getElementById('setupGuide').style.display = 'block';
       return false;
@@ -464,7 +464,7 @@
   
   // Delete entry
   async function deleteFromCloud(id) {
-    if (!currentApiUrl || currentApiUrl === "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE") {
+    if (!currentApiUrl || currentApiUrl === "https://script.google.com/macros/s/AKfycbwZO2UxvvWQvJxKk3z-NZFTmxaS6TPCqp0zIcj71FBS3ye0eepootokTr1wBKChvQfWag/exec") {
       showToast("⚠️ Setup required first", 2000);
       return;
     }
