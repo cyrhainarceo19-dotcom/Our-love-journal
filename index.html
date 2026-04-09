@@ -46,7 +46,7 @@
 <div class="journal-app">
   <div class="header">
     <h1><i class="fas fa-heart" style="color:#e6838e;"></i> Our Forever Journal <i class="fas fa-cloud-upload-alt"></i></h1>
-    <p>auto-save • real-time sync • laging magkasama ang mga alaala natin</p>
+    <p>auto-save • real-time sync • elle and cy</p>
     <div class="sync-status" id="syncStatus">
       <i class="fas fa-spinner fa-pulse"></i> Connecting to cloud...
     </div>
@@ -103,17 +103,17 @@
     const entries = [];
     if (Array.isArray(data)) {
       for (let item of data) {
-        // Handle Sheet.best format - get the first key-value pair
         if (typeof item === 'object') {
           for (let key in item) {
             if (item.hasOwnProperty(key)) {
               try {
-                // Try to parse the value as JSON
                 let entry = item[key];
                 if (typeof entry === 'string') {
                   entry = JSON.parse(entry);
                 }
-                entries.push(entry);
+                if (entry && typeof entry === 'object' && entry.id) {
+                  entries.push(entry);
+                }
               } catch(e) {
                 console.error('Parse error:', e);
               }
@@ -182,8 +182,6 @@
   
   async function deleteEntry(id) {
     try {
-      // Need to find and delete by id - Sheet.best doesn't support direct DELETE by id
-      // So we'll load all, find the one to delete, and use its index
       const response = await fetch(API_URL);
       const rawData = await response.json();
       const entries = parseEntries(rawData);
