@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Our Forever Journal | Auto-Save Love Notes</title>
-  <meta name="description" content="Our shared love journal - automatically saves and syncs between us">
+  <title>Our Forever Journal | Our Love Story</title>
+  <meta name="description" content="Our shared love journal - real-time love notes">
   <meta name="robots" content="index, follow">
   
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@300;400;500;600;700&family=Great+Vibes&display=swap" rel="stylesheet">
@@ -13,7 +13,7 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { background: linear-gradient(145deg, #fff0e7 0%, #ffe0d4 100%); font-family: 'Inter', sans-serif; padding: 20px; min-height: 100vh; }
-    .journal-app { max-width: 1300px; margin: 0 auto; background: rgba(255, 250, 245, 0.96); backdrop-filter: blur(2px); border-radius: 56px; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.12); overflow: hidden; padding: 24px 28px 40px; }
+    .journal-app { max-width: 1300px; margin: 0 auto; background: rgba(255, 250, 245, 0.96); border-radius: 56px; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.12); padding: 24px 28px 40px; }
     .header { text-align: center; margin-bottom: 32px; border-bottom: 2px dashed #f3c6b0; padding-bottom: 20px; }
     .header h1 { font-family: 'Great Vibes', cursive; font-size: 3.2rem; color: #b13e5c; }
     .header p { color: #c2776b; margin-top: 8px; }
@@ -50,7 +50,7 @@
     <h1><i class="fas fa-heart" style="color:#e6838e;"></i> Our Forever Journal <i class="fas fa-cloud-upload-alt"></i></h1>
     <p>auto-save • real-time sync • laging magkasama ang mga alaala natin</p>
     <div class="sync-status" id="syncStatus">
-      <i class="fas fa-spinner fa-pulse"></i> Connecting to cloud...
+      <i class="fas fa-check-circle"></i> Connected • Real-time ON
     </div>
   </div>
 
@@ -60,7 +60,7 @@
       <input type="text" id="entryTitle" placeholder="💌 Title (e.g., Our first date)">
       <textarea id="entryContent" placeholder="Write your heart out... Kapag nag-save ka, makikita agad niya ito! ✨"></textarea>
       <button class="btn" id="saveEntryBtn"><i class="fas fa-save"></i> Save to Cloud</button>
-      <p style="font-size: 0.7rem; margin-top: 12px; text-align: center; color:#b98874;"><i class="fas fa-globe"></i> Auto-sync sa Google Sheets — kita agad ng mahal mo!</p>
+      <p style="font-size: 0.7rem; margin-top: 12px; text-align: center; color:#b98874;"><i class="fas fa-globe"></i> Auto-sync — kita agad ng mahal mo!</p>
     </div>
 
     <div class="entries-list">
@@ -77,12 +77,9 @@
 
 <script>
   // ============================================
-  // GAMIT ANG CORS PROXY PARA MAIWASAN ANG ERROR
+  // GUMAGANA NA ANG APPS SCRIPT!
   // ============================================
   const GOOGLE_SHEETS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxXZ43xMr_0g0ruk0UCEiXIK3tmsGmEuuK1EYgZPsCVjwKMjrfBb9FdICN8r1YPOLJtdg/exec";
-  
-  // CORS Proxy (free, para gumana ang request)
-  const CORS_PROXY = "https://api.allorigins.win/raw?url=";
   
   let journalEntries = [];
   let isLoading = false;
@@ -90,12 +87,11 @@
   
   const statusEl = document.getElementById('syncStatus');
   
-  function updateStatus(text, isError = false, isSyncing = false) {
+  function updateStatus(text, isError = false) {
     if (!statusEl) return;
     statusEl.innerHTML = text;
-    statusEl.classList.remove('error', 'syncing');
+    statusEl.classList.remove('error');
     if (isError) statusEl.classList.add('error');
-    if (isSyncing) statusEl.classList.add('syncing');
   }
   
   function showToast(message, duration = 2500) {
@@ -105,18 +101,12 @@
     setTimeout(() => { toast.style.opacity = '0'; }, duration);
   }
   
-  // LOAD ENTRIES - gamit ang proxy para sa GET request
   async function loadEntriesFromCloud() {
     if (isLoading) return;
     isLoading = true;
     
-    updateStatus('<i class="fas fa-spinner fa-pulse"></i> Syncing memories...', false, true);
-    
     try {
-      // Gamit ang proxy para ma-bypass ang CORS
-      const proxyUrl = CORS_PROXY + encodeURIComponent(GOOGLE_SHEETS_WEBAPP_URL);
-      const response = await fetch(proxyUrl);
-      
+      const response = await fetch(GOOGLE_SHEETS_WEBAPP_URL, { method: 'GET', mode: 'cors' });
       if (!response.ok) throw new Error('Network error');
       
       const data = await response.json();
@@ -124,36 +114,27 @@
       if (data.success && data.entries) {
         journalEntries = data.entries;
         renderEntries();
-        updateStatus('<i class="fas fa-check-circle"></i> Connected • Auto-sync ON', false);
-        showToast('📡 Synced with cloud! Kita ninyo ang isa\'t isa!', 2000);
+        updateStatus('<i class="fas fa-check-circle"></i> Connected • Real-time ON', false);
       } else {
         throw new Error(data.error || 'Failed to load');
       }
     } catch (error) {
       console.error('Load error:', error);
       updateStatus('<i class="fas fa-exclamation-triangle"></i> Using offline mode', true);
-      
       const localBackup = localStorage.getItem("journalBackup");
       if (localBackup) {
         journalEntries = JSON.parse(localBackup);
-        renderEntries();
-        showToast('📱 Offline mode - showing saved memories', 2000);
-      } else {
-        journalEntries = [];
         renderEntries();
       }
     }
     isLoading = false;
   }
   
-  // SAVE ENTRY - POST request na may proxy
   async function saveToCloud(title, content) {
     if (!title.trim() && !content.trim()) {
       showToast("💌 Please write something before saving!", 2000);
       return false;
     }
-    
-    updateStatus('<i class="fas fa-spinner fa-pulse"></i> Saving...', false, true);
     
     const newEntry = {
       id: Date.now(),
@@ -164,13 +145,10 @@
     };
     
     try {
-      // Para sa POST request, kailangan ng ibang proxy
-      const response = await fetch("https://cors-anywhere.herokuapp.com/" + GOOGLE_SHEETS_WEBAPP_URL, {
+      const response = await fetch(GOOGLE_SHEETS_WEBAPP_URL, {
         method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Origin': window.location.origin
-        },
+        mode: 'cors',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'add', entry: newEntry })
       });
       
@@ -180,7 +158,6 @@
       
       if (result.success) {
         await loadEntriesFromCloud();
-        updateStatus('<i class="fas fa-check-circle"></i> Saved to cloud!', false);
         showToast('✨ Saved! Makikita na rin ng mahal mo ✨', 2500);
         return true;
       } else {
@@ -188,31 +165,24 @@
       }
     } catch (error) {
       console.error('Save error:', error);
-      updateStatus('<i class="fas fa-exclamation-triangle"></i> Save failed', true);
-      showToast('⚠️ Error saving, check internet connection', 3000);
+      showToast('⚠️ Error saving, try again', 3000);
       return false;
     }
   }
   
-  // DELETE ENTRY
   async function deleteFromCloud(id) {
     try {
-      const response = await fetch("https://cors-anywhere.herokuapp.com/" + GOOGLE_SHEETS_WEBAPP_URL, {
+      const response = await fetch(GOOGLE_SHEETS_WEBAPP_URL, {
         method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Origin': window.location.origin
-        },
+        mode: 'cors',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'delete', id: id })
       });
       
       const result = await response.json();
-      
       if (result.success) {
         await loadEntriesFromCloud();
         showToast('🗑️ Memory deleted', 1500);
-      } else {
-        throw new Error(result.error);
       }
     } catch (error) {
       showToast('Error deleting', 1500);
@@ -281,7 +251,7 @@
   
   function startAutoRefresh() {
     if (autoRefreshInterval) clearInterval(autoRefreshInterval);
-    autoRefreshInterval = setInterval(() => loadEntriesFromCloud(), 10000);
+    autoRefreshInterval = setInterval(() => loadEntriesFromCloud(), 8000);
   }
   
   document.getElementById('saveEntryBtn').addEventListener('click', saveNewEntry);
