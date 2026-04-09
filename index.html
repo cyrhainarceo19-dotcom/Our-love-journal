@@ -3,10 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Our Shared Journal | J&C</title>
-  <meta name="description" content="Our shared love journal - write memories together">
-  <meta name="keywords" content="love journal, shared diary, couple journal">
-  <meta name="author" content="For us">
+  <title>Our Forever Journal | Auto-Save Love Notes</title>
+  <meta name="description" content="Our shared love journal - automatically saves and syncs between us">
   <meta name="robots" content="index, follow">
   
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@300;400;500;600;700&family=Great+Vibes&display=swap" rel="stylesheet">
@@ -62,8 +60,13 @@
       margin-top: 10px;
       color: #2e7d32;
     }
-    .sync-status i {
-      margin-right: 5px;
+    .sync-status.syncing {
+      background: #fff3e0;
+      color: #e68a2e;
+    }
+    .sync-status.error {
+      background: #ffebee;
+      color: #c62828;
     }
 
     .journal-grid {
@@ -159,6 +162,11 @@
       margin-bottom: 22px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
       border: 1px solid #ffe2d4;
+      transition: all 0.2s;
+    }
+    .journal-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
     }
     .entry-title {
       font-size: 1.35rem;
@@ -172,6 +180,7 @@
       display: flex;
       gap: 10px;
       margin-bottom: 12px;
+      flex-wrap: wrap;
     }
     .entry-content {
       color: #4f3e38;
@@ -216,24 +225,12 @@
       font-size: 1.2rem;
       color: #b35d6e;
     }
-    .share-section {
-      margin-top: 20px;
-      padding: 16px;
-      background: #fdf5ef;
+    .setup-guide {
+      background: #fff3e0;
       border-radius: 28px;
-      text-align: center;
-    }
-    .share-buttons {
-      display: flex;
-      gap: 10px;
-      margin-top: 12px;
-      justify-content: center;
-    }
-    .small-btn {
-      background: #e2bcb0;
-      padding: 8px 16px;
+      padding: 16px;
+      margin-top: 20px;
       font-size: 0.8rem;
-      width: auto;
     }
     @media (max-width: 780px) {
       .journal-app { padding: 16px; }
@@ -252,14 +249,29 @@
       z-index: 1100;
       transition: 0.2s;
     }
+    .loading-spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid #fff;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      margin-right: 8px;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
   </style>
 </head>
 <body>
 <div class="journal-app">
   <div class="header">
-    <h1><i class="fas fa-heart" style="color:#e6838e;"></i> Our Forever Journal <i class="fas fa-feather-alt"></i></h1>
-    <p>where our memories live forever — visible to both of us</p>
-    <div class="sync-status"><i class="fas fa-check-circle"></i> Ready to write our story</div>
+    <h1><i class="fas fa-heart" style="color:#e6838e;"></i> Our Forever Journal <i class="fas fa-cloud-upload-alt"></i></h1>
+    <p>auto-save • real-time sync • laging magkasama ang mga alaala natin</p>
+    <div class="sync-status" id="syncStatus">
+      <i class="fas fa-spinner fa-pulse"></i> Connecting to cloud...
+    </div>
   </div>
 
   <div class="journal-grid">
@@ -269,17 +281,11 @@
         <span>Write a new memory</span>
       </div>
       <input type="text" id="entryTitle" placeholder="💌 Title (e.g., Our first date)">
-      <textarea id="entryContent" placeholder="Write your heart out... Every moment matters, and she will see it! ✨"></textarea>
-      <button class="btn" id="saveEntryBtn"><i class="fas fa-save"></i> Save to Our Journal</button>
-      
-      <div class="share-section">
-        <i class="fas fa-share-alt"></i> Share this journal with your love
-        <div class="share-buttons">
-          <button class="btn small-btn" id="exportBtn"><i class="fas fa-download"></i> Export</button>
-          <button class="btn small-btn" id="importBtn"><i class="fas fa-upload"></i> Import</button>
-        </div>
-        <p style="font-size: 0.7rem; margin-top: 10px;">💡 Export your entries, send the file to her, then she can import to see everything!</p>
-      </div>
+      <textarea id="entryContent" placeholder="Write your heart out... Kapag nag-save ka, makikita agad niya ito! ✨"></textarea>
+      <button class="btn" id="saveEntryBtn"><i class="fas fa-save"></i> Save to Cloud</button>
+      <p style="font-size: 0.7rem; margin-top: 12px; text-align: center; color:#b98874;">
+        <i class="fas fa-globe"></i> Auto-sync sa Google Sheets — kita agad ng mahal mo!
+      </p>
     </div>
 
     <div class="entries-list">
@@ -289,178 +295,230 @@
         <span style="margin-left: auto; font-size: 0.7rem;" id="entryCount"></span>
       </div>
       <div id="entriesContainer">
-        <div class="empty-message"><i class="far fa-heart"></i> No entries yet. Write your first memory! 💕</div>
+        <div class="empty-message"><i class="fas fa-spinner fa-pulse"></i> Loading memories from cloud...</div>
       </div>
-      <button class="btn-secondary btn" id="clearAllBtn" style="margin-top: 16px;"><i class="fas fa-trash-alt"></i> Clear All Memories</button>
     </div>
   </div>
+  
+  <div class="setup-guide" id="setupGuide" style="display: none;">
+    <i class="fas fa-cog"></i> <strong>First time setup?</strong> 
+    <a href="#" id="showInstructions">Click here for 2-minute Google Sheets setup</a>
+  </div>
+  
   <div class="love-footer">
-    🌹 “Every love story is beautiful, but ours is my favorite.” — always ours 🌹
+    🌹 “Every love story is beautiful, but ours is my favorite.” — always ours, always saved 🌹
   </div>
 </div>
 <div id="toastMsg" class="toast-msg" style="opacity:0;">✨</div>
 
 <script>
-  // SIMPLE BUT POWERFUL: LocalStorage + Export/Import
-  // This way, you can share entries with each other easily!
+  // ============================================
+  // GOOGLE SHEETS AUTO-SAVE JOURNAL
+  // ============================================
+  // 
+  // INSTRUCTIONS: 
+  // 1. Create a Google Sheet
+  // 2. Deploy as Web App (Apps Script)
+  // 3. Copy the URL and paste it below
+  // 
+  // ============================================
+  
+  // 🔴 IMPORTANT: I-replace ito ng iyong Google Sheets Web App URL
+  // Pagkatapos mong i-deploy ang Apps Script, kopyahin ang URL at i-paste dito:
+  const GOOGLE_SHEETS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbwWghLl3zbxcdWZRnYNlZVCRF6IOvPdPFDBsVFec4g-R71bHRMnRoSjQtbLMiN2j2I6/exec";
+  
+  // Check kung may saved URL sa localStorage
+  let currentApiUrl = localStorage.getItem("googleSheetsUrl") || GOOGLE_SHEETS_WEBAPP_URL;
   
   let journalEntries = [];
+  let isLoading = false;
+  let autoRefreshInterval = null;
   
-  // Load from localStorage
-  function loadEntries() {
-    const stored = localStorage.getItem("ourLoveJournal");
-    if (stored) {
-      try {
-        journalEntries = JSON.parse(stored);
-      } catch(e) { journalEntries = []; }
-    } else {
-      // Add a welcome example
-      journalEntries = [{
-        id: Date.now(),
-        title: "💖 The Beginning of Us",
-        content: "This is our special journal. Every word we write here becomes a treasure. I love you! ❤️\n\nYou can export our memories and share them with me anytime!",
-        date: new Date().toISOString(),
-        formattedDate: new Date().toLocaleString()
-      }];
-      saveEntries();
+  // Status element
+  const statusEl = document.getElementById('syncStatus');
+  
+  function updateStatus(text, isError = false, isSyncing = false) {
+    if (!statusEl) return;
+    statusEl.innerHTML = text;
+    statusEl.classList.remove('error', 'syncing');
+    if (isError) statusEl.classList.add('error');
+    if (isSyncing) statusEl.classList.add('syncing');
+  }
+  
+  function showToast(message, duration = 2500) {
+    const toast = document.getElementById('toastMsg');
+    toast.innerText = message;
+    toast.style.opacity = '1';
+    setTimeout(() => {
+      toast.style.opacity = '0';
+    }, duration);
+  }
+  
+  // Load entries from Google Sheets
+  async function loadEntriesFromCloud() {
+    if (isLoading) return;
+    isLoading = true;
+    
+    if (!currentApiUrl || currentApiUrl === "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE") {
+      updateStatus('⚠️ Need setup: Click guide below', true);
+      document.getElementById('setupGuide').style.display = 'block';
+      isLoading = false;
+      return;
     }
-    renderEntries();
-  }
-  
-  function saveEntries() {
-    localStorage.setItem("ourLoveJournal", JSON.stringify(journalEntries));
-    updateCount();
-  }
-  
-  function updateCount() {
-    const countSpan = document.getElementById('entryCount');
-    if (countSpan) {
-      countSpan.innerText = `${journalEntries.length} memory${journalEntries.length !== 1 ? 'ies' : 'y'}`;
+    
+    updateStatus('<i class="fas fa-spinner fa-pulse"></i> Syncing memories...', false, true);
+    
+    try {
+      const response = await fetch(currentApiUrl + '?action=get', {
+        method: 'GET',
+        mode: 'cors'
+      });
+      
+      if (!response.ok) throw new Error('Network error');
+      
+      const data = await response.json();
+      
+      if (data.success && data.entries) {
+        journalEntries = data.entries;
+        renderEntries();
+        updateStatus('<i class="fas fa-check-circle"></i> Connected • Auto-sync ON', false);
+        showToast('📡 Synced with cloud! Kita ninyo ang isa\'t isa!', 2000);
+      } else {
+        throw new Error(data.error || 'Failed to load');
+      }
+    } catch (error) {
+      console.error('Load error:', error);
+      updateStatus('<i class="fas fa-exclamation-triangle"></i> Using offline mode', true);
+      
+      // Fallback to localStorage kung offline
+      const localBackup = localStorage.getItem("journalBackup");
+      if (localBackup) {
+        journalEntries = JSON.parse(localBackup);
+        renderEntries();
+        showToast('📱 Offline mode - showing saved memories', 2000);
+      } else {
+        journalEntries = [];
+        renderEntries();
+      }
     }
+    
+    isLoading = false;
   }
   
-  function addEntry(title, content) {
+  // Save entry to Google Sheets
+  async function saveToCloud(title, content) {
     if (!title.trim() && !content.trim()) {
       showToast("💌 Please write something before saving!", 2000);
       return false;
     }
     
+    if (!currentApiUrl || currentApiUrl === "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE") {
+      showToast("⚠️ Please complete the Google Sheets setup first (click the guide below)", 3000);
+      document.getElementById('setupGuide').style.display = 'block';
+      return false;
+    }
+    
+    updateStatus('<i class="fas fa-spinner fa-pulse"></i> Saving...', false, true);
+    
     const newEntry = {
       id: Date.now(),
       title: title.trim() || "💭 A sweet memory",
-      content: content.trim() || "✨ (a beautiful silent moment)",
+      content: content.trim() || "✨ (a beautiful moment)",
       date: new Date().toISOString(),
       formattedDate: new Date().toLocaleString()
     };
     
-    journalEntries.unshift(newEntry);
-    saveEntries();
-    renderEntries();
-    showToast("🌸 Memory saved! Share the export file with your love to sync! 🌸", 2500);
-    return true;
-  }
-  
-  function deleteEntry(id) {
-    journalEntries = journalEntries.filter(entry => entry.id !== id);
-    saveEntries();
-    renderEntries();
-    showToast("🗑️ Entry removed", 1500);
-  }
-  
-  function clearAll() {
-    if (journalEntries.length === 0) return;
-    if (confirm("⚠️ Clear ALL memories? This will delete everything from this device. Make sure you've exported first!")) {
-      journalEntries = [];
-      saveEntries();
-      renderEntries();
-      showToast("✨ All cleared. Start fresh! ✨", 2000);
+    try {
+      const response = await fetch(currentApiUrl, {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'add',
+          entry: newEntry
+        })
+      });
+      
+      if (!response.ok) throw new Error('Save failed');
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        // Refresh agad para makita ang bagong entry
+        await loadEntriesFromCloud();
+        updateStatus('<i class="fas fa-check-circle"></i> Saved to cloud!', false);
+        showToast('✨ Saved! Makikita na rin ng mahal mo ✨', 2500);
+        return true;
+      } else {
+        throw new Error(result.error);
+      }
+    } catch (error) {
+      console.error('Save error:', error);
+      updateStatus('<i class="fas fa-exclamation-triangle"></i> Save failed', true);
+      showToast('⚠️ Error saving, check internet connection', 3000);
+      return false;
     }
   }
   
-  // Export to JSON file
-  function exportData() {
-    const dataStr = JSON.stringify(journalEntries, null, 2);
-    const blob = new Blob([dataStr], {type: "application/json"});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `our-journal-${new Date().toISOString().slice(0,19)}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    showToast("📁 Journal exported! Send this file to your love 💕", 2500);
-  }
-  
-  // Import from JSON file
-  function importData() {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'application/json';
-    input.onchange = (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
+  // Delete entry
+  async function deleteFromCloud(id) {
+    if (!currentApiUrl || currentApiUrl === "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE") {
+      showToast("⚠️ Setup required first", 2000);
+      return;
+    }
+    
+    try {
+      const response = await fetch(currentApiUrl, {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'delete',
+          id: id
+        })
+      });
       
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        try {
-          const imported = JSON.parse(event.target.result);
-          if (Array.isArray(imported)) {
-            // Merge: add imported entries that don't already exist (by id)
-            const existingIds = new Set(journalEntries.map(e => e.id));
-            const newEntries = imported.filter(entry => !existingIds.has(entry.id));
-            
-            if (newEntries.length === 0) {
-              showToast("No new entries found! Already have these memories.", 2000);
-            } else {
-              journalEntries = [...newEntries, ...journalEntries];
-              journalEntries.sort((a,b) => new Date(b.date) - new Date(a.date));
-              saveEntries();
-              renderEntries();
-              showToast(`✨ Added ${newEntries.length} new memory/ies from your love! ✨`, 3000);
-            }
-          } else {
-            showToast("Invalid file format", 2000);
-          }
-        } catch(err) {
-          showToast("Error reading file", 2000);
-        }
-      };
-      reader.readAsText(file);
-    };
-    input.click();
-  }
-  
-  function escapeHtml(str) {
-    if (!str) return '';
-    return str.replace(/[&<>]/g, function(m) {
-      if (m === '&') return '&amp;';
-      if (m === '<') return '&lt;';
-      if (m === '>') return '&gt;';
-      return m;
-    }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
-      return c;
-    });
+      const result = await response.json();
+      
+      if (result.success) {
+        await loadEntriesFromCloud();
+        showToast('🗑️ Memory deleted', 1500);
+      } else {
+        throw new Error(result.error);
+      }
+    } catch (error) {
+      showToast('Error deleting', 1500);
+    }
   }
   
   function renderEntries() {
     const container = document.getElementById('entriesContainer');
+    const countSpan = document.getElementById('entryCount');
+    
     if (!container) return;
     
-    if (journalEntries.length === 0) {
-      container.innerHTML = `<div class="empty-message"><i class="far fa-heart"></i> No memories yet. Write your first memory together! 💕</div>`;
+    if (!journalEntries || journalEntries.length === 0) {
+      container.innerHTML = `<div class="empty-message"><i class="far fa-heart"></i> No memories yet. Write your first memory! 💕</div>`;
+      if (countSpan) countSpan.innerText = '0 memories';
       return;
     }
     
+    // Sort newest first
+    const sorted = [...journalEntries].sort((a,b) => new Date(b.date) - new Date(a.date));
+    
     let html = '';
-    for (let entry of journalEntries) {
+    for (let entry of sorted) {
       const safeTitle = escapeHtml(entry.title);
       const safeContent = escapeHtml(entry.content).replace(/\n/g, '<br>');
       html += `
         <div class="journal-card">
           <div class="entry-title">${safeTitle}</div>
           <div class="entry-meta">
-            <span><i class="far fa-calendar-alt"></i> ${entry.formattedDate}</span>
+            <span><i class="far fa-calendar-alt"></i> ${entry.formattedDate || new Date(entry.date).toLocaleString()}</span>
           </div>
           <div class="entry-content">${safeContent}</div>
           <div class="card-actions">
@@ -471,55 +529,153 @@
     }
     container.innerHTML = html;
     
+    if (countSpan) {
+      countSpan.innerText = `${journalEntries.length} memory${journalEntries.length !== 1 ? 'ies' : 'y'}`;
+    }
+    
     // Attach delete events
     document.querySelectorAll('.delete-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const id = Number(btn.getAttribute('data-id'));
-        deleteEntry(id);
+        if (confirm("Delete this memory? It will be removed for both of you.")) {
+          deleteFromCloud(id);
+        }
       });
     });
-    updateCount();
   }
   
-  function showToast(message, duration = 2000) {
-    const toast = document.getElementById('toastMsg');
-    toast.innerText = message;
-    toast.style.opacity = '1';
-    setTimeout(() => {
-      toast.style.opacity = '0';
-    }, duration);
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+      if (m === '&') return '&amp;';
+      if (m === '<') return '&lt;';
+      if (m === '>') return '&gt;';
+      return m;
+    });
   }
   
-  // Event listeners
-  document.getElementById('saveEntryBtn').addEventListener('click', () => {
+  // Save new entry from form
+  async function saveNewEntry() {
     const title = document.getElementById('entryTitle').value;
     const content = document.getElementById('entryContent').value;
-    if (addEntry(title, content)) {
+    
+    const success = await saveToCloud(title, content);
+    if (success) {
       document.getElementById('entryTitle').value = '';
       document.getElementById('entryContent').value = '';
     }
+  }
+  
+  // Auto-refresh every 10 seconds
+  function startAutoRefresh() {
+    if (autoRefreshInterval) clearInterval(autoRefreshInterval);
+    autoRefreshInterval = setInterval(() => {
+      loadEntriesFromCloud();
+    }, 10000);
+  }
+  
+  // Setup instructions
+  function showSetupInstructions() {
+    const instructions = `
+📝 GOOGLE SHEETS SETUP (2 minutes lang):
+
+1. Pumunta sa: https://sheets.new
+2. Gumawa ng bagong Sheet, pangalan: "Love Journal"
+3. Click Extensions → Apps Script
+4. I-delete ang default code at i-paste ito:
+
+---
+function doGet() {
+  return ContentService.createTextOutput(JSON.stringify(getEntries()))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function doPost(e) {
+  try {
+    const data = JSON.parse(e.postData.contents);
+    if (data.action === 'add') {
+      return addEntry(data.entry);
+    } else if (data.action === 'delete') {
+      return deleteEntry(data.id);
+    }
+    return {success: false, error: "Invalid action"};
+  } catch(err) {
+    return {success: false, error: err.toString()};
+  }
+}
+
+function getEntries() {
+  const sheet = SpreadsheetApp.getActiveSheet();
+  const data = sheet.getDataRange().getValues();
+  const entries = [];
+  for(let i=1; i<data.length; i++) {
+    if(data[i][0]) {
+      entries.push(JSON.parse(data[i][0]));
+    }
+  }
+  return {success: true, entries: entries};
+}
+
+function addEntry(entry) {
+  const sheet = SpreadsheetApp.getActiveSheet();
+  sheet.appendRow([JSON.stringify(entry)]);
+  return {success: true};
+}
+
+function deleteEntry(id) {
+  const sheet = SpreadsheetApp.getActiveSheet();
+  const data = sheet.getDataRange().getValues();
+  for(let i=data.length-1; i>=1; i--) {
+    if(data[i][0]) {
+      const entry = JSON.parse(data[i][0]);
+      if(entry.id == id) {
+        sheet.deleteRow(i+1);
+        return {success: true};
+      }
+    }
+  }
+  return {success: false, error: "Not found"};
+}
+---
+
+5. I-click Deploy → New Deployment
+6. Type: "Web App", Execute as: "Me", Access: "Anyone"
+7. I-click Deploy → Authorize → Copy URL
+8. I-paste ang URL sa journal website (sa code: GOOGLE_SHEETS_WEBAPP_URL)
+9. I-upload ulit sa GitHub
+
+Tapos na! Auto-sync na ang journal ninyo! 💕
+    `;
+    
+    alert(instructions);
+    showToast("📋 Check the instructions! Kailangan lang ng 2 minutes setup.", 5000);
+  }
+  
+  // Event listeners
+  document.getElementById('saveEntryBtn').addEventListener('click', saveNewEntry);
+  document.getElementById('showInstructions').addEventListener('click', (e) => {
+    e.preventDefault();
+    showSetupInstructions();
   });
   
-  document.getElementById('exportBtn').addEventListener('click', exportData);
-  document.getElementById('importBtn').addEventListener('click', importData);
-  document.getElementById('clearAllBtn').addEventListener('click', clearAll);
-  
-  // Keyboard shortcut: Ctrl+Enter to save
+  // Ctrl+Enter shortcut
   document.getElementById('entryContent').addEventListener('keydown', (e) => {
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
       e.preventDefault();
-      document.getElementById('saveEntryBtn').click();
+      saveNewEntry();
     }
   });
   
-  // Initialize
-  loadEntries();
+  // Initial load
+  loadEntriesFromCloud();
+  startAutoRefresh();
   
-  // Add SEO meta for Google
-  const seoMeta = document.createElement('meta');
-  seoMeta.name = "googlebot";
-  seoMeta.content = "index, follow";
-  document.head.appendChild(seoMeta);
+  // Save backup sa localStorage
+  setInterval(() => {
+    if (journalEntries.length > 0) {
+      localStorage.setItem("journalBackup", JSON.stringify(journalEntries));
+    }
+  }, 30000);
 </script>
 </body>
-</html>    
+</html>
