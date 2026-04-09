@@ -77,11 +77,13 @@
 
 <script>
   // ============================================
-  // IYONG BAGONG GOOGLE SHEETS WEB APP URL
+  // GAMIT ANG CORS PROXY PARA MAIWASAN ANG ERROR
   // ============================================
   const GOOGLE_SHEETS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxXZ43xMr_0g0ruk0UCEiXIK3tmsGmEuuK1EYgZPsCVjwKMjrfBb9FdICN8r1YPOLJtdg/exec";
   
-  let currentApiUrl = GOOGLE_SHEETS_WEBAPP_URL;
+  // CORS Proxy (free, para gumana ang request)
+  const CORS_PROXY = "https://api.allorigins.win/raw?url=";
+  
   let journalEntries = [];
   let isLoading = false;
   let autoRefreshInterval = null;
@@ -103,6 +105,7 @@
     setTimeout(() => { toast.style.opacity = '0'; }, duration);
   }
   
+  // LOAD ENTRIES - gamit ang proxy para sa GET request
   async function loadEntriesFromCloud() {
     if (isLoading) return;
     isLoading = true;
@@ -110,10 +113,9 @@
     updateStatus('<i class="fas fa-spinner fa-pulse"></i> Syncing memories...', false, true);
     
     try {
-      const response = await fetch(currentApiUrl, {
-        method: 'GET',
-        mode: 'cors'
-      });
+      // Gamit ang proxy para ma-bypass ang CORS
+      const proxyUrl = CORS_PROXY + encodeURIComponent(GOOGLE_SHEETS_WEBAPP_URL);
+      const response = await fetch(proxyUrl);
       
       if (!response.ok) throw new Error('Network error');
       
@@ -144,6 +146,7 @@
     isLoading = false;
   }
   
+  // SAVE ENTRY - POST request na may proxy
   async function saveToCloud(title, content) {
     if (!title.trim() && !content.trim()) {
       showToast("💌 Please write something before saving!", 2000);
@@ -161,10 +164,13 @@
     };
     
     try {
-      const response = await fetch(currentApiUrl, {
+      // Para sa POST request, kailangan ng ibang proxy
+      const response = await fetch("https://cors-anywhere.herokuapp.com/" + GOOGLE_SHEETS_WEBAPP_URL, {
         method: 'POST',
-        mode: 'cors',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Origin': window.location.origin
+        },
         body: JSON.stringify({ action: 'add', entry: newEntry })
       });
       
@@ -188,12 +194,15 @@
     }
   }
   
+  // DELETE ENTRY
   async function deleteFromCloud(id) {
     try {
-      const response = await fetch(currentApiUrl, {
+      const response = await fetch("https://cors-anywhere.herokuapp.com/" + GOOGLE_SHEETS_WEBAPP_URL, {
         method: 'POST',
-        mode: 'cors',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Origin': window.location.origin
+        },
         body: JSON.stringify({ action: 'delete', id: id })
       });
       
